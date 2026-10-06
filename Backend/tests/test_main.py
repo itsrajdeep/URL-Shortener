@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from fastapi.testclient import TestClient  #allows to test without starting server
+
 from main import Base62Encode, app, generate_code
 
 client = TestClient(app) #Testing Client
