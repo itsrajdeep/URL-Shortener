@@ -3,6 +3,7 @@ create table if NOT EXISTS urls(
     short_code VARCHAR(10) UNIQUE NOT NULL,
     original_url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    expires_at TIMESTAMP
 );
 
 
