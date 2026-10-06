@@ -1,9 +1,13 @@
-from fastapi import FastAPI,HTTPException
-from fastapi.responses import RedirectResponse
-from pydantic import BaseModel,HttpUrl  #Pydantic helps FastAPI understand and validate the incoming data.
-import string
-import psycopg
 import random
+import string
+
+import psycopg
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
+from pydantic import (  #Pydantic helps FastAPI understand and validate the incoming data.
+    BaseModel,
+    HttpUrl,
+)
 
 app = FastAPI() #creates the application
 
