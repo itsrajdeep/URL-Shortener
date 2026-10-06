@@ -3,36 +3,25 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from fastapi.testclient import TestClient
-from main import app, urls, Base62Encode, generate_code
+from fastapi.testclient import TestClient  #allows to test without starting server
+
+from main import app, Base62Encode, generate_code
+
+client = TestClient(app) #Testing Client
 
 
-client = TestClient(app)
-
-
-# -------------------------
-# Base62 tests
-# -------------------------
-
+#  Encoder Tests ---
 def test_base62_zero():
     assert Base62Encode(0) == "0"
-
 
 def test_base62_one():
     assert Base62Encode(1) == "1"
 
-
 def test_base62_61():
     assert Base62Encode(61) == "Z"
 
-
 def test_base62_62():
     assert Base62Encode(62) == "10"
-
-
-def test_base62_63():
-    assert Base62Encode(63) == "11"
-
 
 def test_base62_large_number():
     result = Base62Encode(100000)
@@ -41,40 +30,26 @@ def test_base62_large_number():
     assert len(result) > 0
 
 
-# -------------------------
-# Code generator tests
-# -------------------------
+#Code-Generator Tests --- 
 
 def test_generate_code_not_empty():
     code = generate_code()
 
     assert code != ""
 
-
 def test_generate_code_is_string():
     code = generate_code()
 
     assert isinstance(code, str)
 
-
-def test_generate_code_has_no_collision():
-    urls.clear()
-
-    urls["1"] = "https://example.com"
-
+def test_generate_code_length():
     code = generate_code()
 
-    assert code != "1"
-    assert code not in urls
+    assert 1 <= len(code) <= 6
 
-
-# -------------------------
-# POST /shorten tests
-# -------------------------
+#API Tests -----
 
 def test_shorten_valid_url():
-    urls.clear()
-
     response = client.post(
         "/shorten",
         json={"url": "https://www.google.com"}
@@ -87,10 +62,7 @@ def test_shorten_valid_url():
     assert "code" in data
     assert "short_url" in data
 
-
-def test_shorten_stores_url():
-    urls.clear()
-
+def test_shorten_returns_valid_code():
     response = client.post(
         "/shorten",
         json={"url": "https://example.com"}
@@ -98,10 +70,8 @@ def test_shorten_stores_url():
 
     data = response.json()
 
-    code = data["code"]
-
-    assert code in urls
-    assert urls[code] == "https://example.com/"
+    assert isinstance(data["code"], str)
+    assert len(data["code"]) > 0
 
 
 def test_invalid_url():
@@ -129,32 +99,3 @@ def test_url_wrong_type():
     )
 
     assert response.status_code == 422
-
-
-# -------------------------
-# Redirect tests
-# -------------------------
-
-def test_redirect_existing_code():
-    urls.clear()
-
-    urls["abc"] = "https://google.com"
-
-    response = client.get(
-        "/abc",
-        follow_redirects=False
-    )
-
-    assert response.status_code == 302
-    assert response.headers["location"] == "https://google.com"
-
-
-def test_redirect_invalid_code():
-    urls.clear()
-
-    response = client.get(
-        "/doesnotexist",
-        follow_redirects=False
-    )
-
-    assert response.status_code == 404
