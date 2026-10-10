@@ -7,3 +7,13 @@ create table if NOT EXISTS urls(
 );
 
 
+
+CREATE TABLE IF NOT EXISTS clicks (
+    id BIGSERIAL PRIMARY KEY,
+    short_code VARCHAR(10) NOT NULL
+        REFERENCES urls(short_code),
+    clicked_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_clicks_code_time
+ON clicks (short_code, clicked_at);
